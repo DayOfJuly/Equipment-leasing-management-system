@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration>
+
+<configuration debug="false">
+
+	<property name="LOG_HOME" value="/home/equ_2016/logs/eqpt/logback/" />
+
+	<!-- output console -->
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<Encoding>utf-8</Encoding>
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<pattern>
+				%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] %logger %X{loginId} - %msg%n
+			</pattern>
+		</layout>
+	</appender>
+
+	<!-- output file -->
+	<!-- 按照日期，每天生成一个日志文件，并将前一天的日志文件压缩成zip文件格式保存 -->
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<Encoding>utf-8</Encoding>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<FileNamePattern>${LOG_HOME}/equipment.%d{yyyy-MM-dd}.log.zip</FileNamePattern>
+		</rollingPolicy>
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<pattern>
+				%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] %logger %X{loginId} - %msg%n
+			</pattern>
+		</layout>
+	</appender>
+
+	<logger name="org.springframework.data.rest.webmvc" additivity="false">
+		<level value="WARN" />
+ 		 <appender-ref ref="FILE" />
+		<appender-ref ref="CONSOLE" />
+	</logger>
+
+	<logger name="org.springframework.web.servlet.mvc" additivity="false">
+		<level value="WARN" />
+ 		 <appender-ref ref="FILE" /> 
+		<appender-ref ref="CONSOLE" /> 
+	</logger>
+
+	<logger name="org.hibernate.SQL" additivity="false">
+		<level value="DEBUG" />
+ 		<appender-ref ref="FILE" /> 
+		<appender-ref ref="CONSOLE" />
+	</logger>
+
+	<root level="INFO">
+		 <appender-ref ref="FILE" /> 
+		 <appender-ref ref="CONSOLE" /> 
+	</root>
+
+</configuration>

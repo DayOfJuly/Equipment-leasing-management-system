@@ -1,0 +1,37 @@
+## the local file path
+#tmpFilePath=D:/equ_2016/file/tmpFilePath
+#realfilePath=D:/equ_2016/file/realfilePath
+#tmpInfoFilePath=D:/equ_2016/file/tmpInfoFilePath
+#realInfofilePath=D:/equ_2016/file/realInfofilePath
+## 生成excel文件路径，下载的时候，/BusEquipmentStatisticsExport/Download/{fileName}/{fileSuffix}写死了文件路径
+#exportExcelPath=D:/equ_2016/file/media/excelFile
+
+# the release file path
+#the file path is not use
+tmpFilePath=/home/equ_2016/file/tmpFilePath
+realfilePath=/home/equ_2016/file/realfilePath
+#the file path is use
+tmpInfoFilePath=/home/equ_2016/file/tmpInfoFilePath
+realInfofilePath=/home/equ_2016/file/realInfofilePath
+ #生成excel文件路径，下载的时候，/BusEquipmentStatisticsExport/Download/{fileName}/{fileSuffix}写死了文件路径
+exportExcelPath=/home/equ_2016/file/media/excelFile
+
+oauth.casServerUrlPrefix=https://logintest.crecgwm.com:8091/CAS
+oauth.serverName=http://192.168.0.116:8080
+#oauth.serverName=http://192.168.0.111:8080
+oauth.casServerLoginUrl=https://logintest.crecgwm.com:8091/CAS/login
+oauth.clientId=1000000050
+oauth.secret=sdnpqQJLwcj7dJI0s7jMA6E1RtWKBYp7
+
+
+#oauth.urlPatterns=/WebSite/Back/*,/BG/*
+oauth.urlPatterns=/WebSite/BackCopy/*
+
+oauth.authServerName=http://192.168.0.116:8080
+#oauth.authServerName=http://192.168.0.111:8080
+oauth.redirectAfterValidation = true
+
+wsclient.clientid=1000000050
+wsclient.clientsecret=sdnpqQJLwcj7dJI0s7jMA6E1RtWKBYp7
+
+server.url=192.168.0.116:8080

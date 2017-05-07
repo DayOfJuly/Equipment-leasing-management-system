@@ -1,0 +1,186 @@
+package com.hjd.action;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.hjd.action.bean.BusPublishHistBean;
+import com.hjd.action.bean.BusPublishHistSearchBean;
+import com.hjd.base.BaseAction;
+import com.hjd.base.IFException;
+import com.hjd.dao.IBizExDataDao;
+import com.hjd.dao.IEquipmentDao;
+import com.hjd.domain.BizExData;
+import com.hjd.domain.EquipmentTable;
+import com.hjd.domain.ViewPublishHist;
+import com.hjd.util.Util;
+
+@RestController
+public class BusPublishHistAction extends BaseAction{
+	
+/*发布结果登记的信息++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/	
+	@Autowired
+	IEquipmentDao iEquipmentDao;//设备资源管理（台账）Dao
+	@Autowired
+	IBizExDataDao iBizExDataDao;
+	//1：查询当前登录人的设备信息
+	/**
+	 * 根据当前登录人查询其发布结果登记的记录
+	 * @param busPublishHistSearchBean
+	 * @return
+	 */
+	@SuppressWarnings("deprecation")
+	@RequestMapping(value="/BG/BusPublishHist",method={RequestMethod.POST})
+	public Page<?> queryAll(@RequestBody BusPublishHistSearchBean busPublishHistSearchBean,HttpSession httpSession)
+	{
+		//传递分页参数的载体
+/*		Integer pageNo = busPublishHistSearchBean.getPageNo();
+		Integer pageSize = busPublishHistSearchBean.getPageSize();
+		PageRequest pageRequest=new PageRequest(pageNo<0?0:pageNo, pageSize);*/
+		
+		//拼写的列表查询语句
+		StringBuffer listSql = new StringBuffer();
+		listSql.append("SELECT obj ");
+		listSql.append("FROM ViewPublishHist  obj ");
+		listSql.append("WHERE 1=1 ");
+		
+		//拼写获取总的记录条数的查询语句
+		StringBuffer countSql = new StringBuffer();
+		countSql.append("SELECT count(1) "); 
+		countSql.append("FROM ViewPublishHist obj ");		
+		countSql.append("WHERE 1=1 ");
+		
+
+		
+		//传递条件查询参数的载体
+		Map<String,Object> sqlParamsMap = new HashMap<String, Object>();
+		
+		//默认显示发布结果成功的数据
+		sqlParamsMap.put("dataState",3);
+		listSql.append(" AND obj.dataState = :dataState");
+		countSql.append(" AND obj.dataState = :dataState");
+
+		//仅显示当前登录人成功的发布信息
+		Map<?, ?> userMap=(Map<?, ?>)httpSession.getAttribute("userInfo");
+		Long partyId=(Long)userMap.get("loginUserId");
+//		Long partyId=Long.parseLong("316"); //用于压力测试，测试完毕需要恢复
+		sqlParamsMap.put("pubLoginUserId",partyId);
+		listSql.append(" AND obj.pubLoginUserId = :pubLoginUserId");
+		countSql.append(" AND obj.pubLoginUserId = :pubLoginUserId");
+		//信息类型
+		if(Util.isNotNullOrEmpty(busPublishHistSearchBean.getState()))
+		{
+			sqlParamsMap.put("state", busPublishHistSearchBean.getState());
+			listSql.append(" AND obj.state = :state");
+			countSql.append(" AND obj.state = :state");
+		}
+		//最小发布时间
+		if(Util.isNotNullOrEmpty(busPublishHistSearchBean.getStartReleaseDate()))
+		{
+			sqlParamsMap.put("startReleaseDate", busPublishHistSearchBean.getStartReleaseDate());
+			listSql.append(" AND obj.releaseDate >= :startReleaseDate");//这俩日期参数不用在VIewPublishHist中加上么？
+			countSql.append(" AND obj.releaseDate >= :startReleaseDate");
+		}
+		//最大发布时间
+		if(Util.isNotNullOrEmpty(busPublishHistSearchBean.getEndReleaseDate()))
+		{
+			Date endReleaseDate= busPublishHistSearchBean.getEndReleaseDate();
+			endReleaseDate.setHours(23);
+			endReleaseDate.setMinutes(59);
+			endReleaseDate.setSeconds(59);
+			sqlParamsMap.put("endReleaseDate",endReleaseDate);
+			listSql.append(" AND obj.releaseDate <= :endReleaseDate");
+			countSql.append(" AND obj.releaseDate <= :endReleaseDate");
+		}
+
+		listSql.append(" ORDER BY obj.state ,obj.releaseDate ");
+		Page<?> datas = (Page<?>)queryList(listSql.toString(),countSql.toString(),sqlParamsMap,busPublishHistSearchBean.getPageRequest());
+		
+		return datas;	
+	}
+	//2：查看单个的设备信息
+	/**
+	 * 查看我已发布的登记结果，供查看和登记两个按钮使用
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping(value="/BG/BusPublishHist/{id}",method={RequestMethod.GET})
+	public Map<String, Object> getPublishHist(@PathVariable Long id)
+	{
+		//id：我已发布信息的记录ID
+	    Map<String, Object> map = new HashMap<String, Object>();
+	    ViewPublishHist viewPublishHist =iBizExDataDao.queryDescs(id);
+	    map.put("publishInfo", viewPublishHist);
+	    return map;
+	}
+	//3：登记对应的发布结果信息
+	@RequestMapping(value="/BG/BusPublishHist",method={RequestMethod.PUT})
+	@Transactional
+	public Map<String, String> busDealInfoDel(@RequestBody BusPublishHistBean busPublishHistBean)
+	{
+	    // 信息发布的ID
+	    Long dataId=busPublishHistBean.getDataId();
+	    if(dataId==null){throw new IFException("信息的发布不能为空");}
+	    BizExData be=iBizExDataDao.queryByDataId(dataId);
+	    be.setBusState(busPublishHistBean.getBusState());
+	    be.setState(busPublishHistBean.getState());
+	    be.setDepName(busPublishHistBean.getDepName());
+	    be.setNote(busPublishHistBean.getNote());
+	    be.setForecastSum(busPublishHistBean.getForecastSum());
+	    be.setDealDate(new Date());//添加发布信息的时间崭认为是成交的时间
+	    iBizExDataDao.save(be);
+
+	    //数据类型——四种发布数据的类型 1：出租、2：出售、3：求租、4：求购
+	    Integer dataType=be.getDataType();
+	    
+	    if(dataType==1 || dataType==2)//出租/出售
+	    {
+			//闭环——修改资源的设备状态——闲置，修改资源的发布状态——未发布
+			Long equipmentId = be.getEquipmentId();
+			EquipmentTable e =iEquipmentDao.queryDesc(equipmentId);
+			e.setEquState(1);//设备状态闲置
+		    e.setRentFlag(0);//可出租，为空
+		    e.setSaleFlag(0);//可出售，为空
+		    
+			Integer pubState = e.getPubState();	//	发布状态（1-未发布，2-出租发布中，3-出售发布中，4-租售发布中）
+			if(dataType==1)//出租
+			{
+				if(pubState==4)//对出租做发布结果登记，如果设备的发布状态是租售发布中，则修改为出售发布中，否则修改为未发布
+				{
+					 e.setPubState(3);
+				}
+				else
+				{
+					 e.setPubState(1);
+				}
+			}
+			else//出售
+			{
+				if(pubState==4)//对出售做发布结果登记，如果设备的发布状态是租售发布中，则修改为出租发布中，否则修改为未发布
+				{
+					 e.setPubState(2);
+				}
+				else
+				{
+					 e.setPubState(1);
+				}
+			}
+
+	    }
+
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("msg", "保存成功");
+		return map;
+	}
+}

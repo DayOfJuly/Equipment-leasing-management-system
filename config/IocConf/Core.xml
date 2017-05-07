@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns:context="http://www.springframework.org/schema/context" 
+xmlns:aop="http://www.springframework.org/schema/aop" 
+xmlns:tx="http://www.springframework.org/schema/tx" 
+xmlns:p="http://www.springframework.org/schema/p" 
+xmlns:cache="http://www.springframework.org/schema/cache" 
+xmlns:jpa="http://www.springframework.org/schema/data/jpa" 
+xmlns:mvc="http://www.springframework.org/schema/mvc"
+xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd 
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd 
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd 
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd 
+http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-4.1.xsd 
+http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+http://www.springframework.org/schema/mvc
+http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+    
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:Properties/Action.properties</value>
+				<value>classpath:Properties/Jdbc.properties</value>
+			</list>
+		</property>
+		<property name="fileEncoding">
+			<value>utf-8</value>
+		</property>
+	</bean>
+
+	<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping" />
+	<!-- 视图解析器 -->
+<!-- 	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="/WebSite" />
+		<property name="suffix" value=".jsp"></property>
+	</bean> -->
+
+	<!-- 数据库配置 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<!-- 开启定时检测空闲连接的有效性 -->
+		<property name="validationQuery" value="${jdbc.testsql}" />
+		<property name="numTestsPerEvictionRun" value="${jdbc.testsql.maxidle}" />
+		<property name="timeBetweenEvictionRunsMillis" value="${jdbc.testsql.runtime}" />
+		<property name="testOnBorrow" value="${jdbc.onborrow}" />
+		<property name="testWhileIdle" value="${jdbc.whileidle}" />
+	</bean>
+	<!-- 定义实体管理器工厂 -->
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="persistenceUnitName" value="persistenceUnit" />
+	</bean>
+	<!-- 配置事务管理器 -->
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+
+<!-- 	<bean id="SendToTransportBean" class="com.hjd.util.SendToTransport"></bean> -->
+
+	<!-- 启用 annotation事务 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<!-- 配置Spring Data JPA扫描目录 -->
+	<jpa:repositories base-package="com.hjd.domain,com.hjd.dao" />
+	<!-- base-package这里匹配的是包名，web.*不会匹配到包web下的类，他匹配的是web下的所有一级包，而base-package的语义为基础包，所以web.*在这个场景的语义为“以包web下的各一级包为基础包”(他会扫描到各一级包及其所有子包中的类) -->
+	<context:component-scan base-package="com.hjd.action,com.hjd.service,com.hjd.base" />
+
+</beans>

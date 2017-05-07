@@ -1,0 +1,44 @@
+jdbc.driverClassName=com.mysql.jdbc.Driver
+
+#the test database
+#jdbc.url=jdbc:mysql://192.168.0.10:3306/equ_test?useUnicode=true&characterEncoding=utf8
+#jdbc.username=hjd
+#jdbc.password=hjd213
+
+# the develop database
+#jdbc.url=jdbc:mysql://192.168.0.10:3306/equipment_dev?useUnicode=true&characterEncoding=utf8
+##the clear backup database
+#jdbc.url=jdbc:mysql://192.168.0.10:3306/hjd_equ_bak_clear?useUnicode=true&characterEncoding=utf8
+#the  locale test database
+#jdbc.url=jdbc:mysql://192.168.0.10:3306/hjd_equ_test?useUnicode=true&characterEncoding=utf8
+#jdbc.username=hjd
+#jdbc.password=hjd213
+
+#the Linux database
+#jdbc.url=jdbc:mysql://124.205.89.215:3306/equipment?useUnicode=true&characterEncoding=utf8
+# this can use
+#jdbc.url=jdbc:mysql://192.168.0.202:3308/equipment?useUnicode=true&characterEncoding=utf8
+#jdbc.url=jdbc:mysql://localhost:3306/equipment?useUnicode=true&characterEncoding=utf8
+
+#jdbc.username=root
+#jdbc.password=cfbdymg
+
+
+#the ZTLB clear backup database
+#jdbc.url=jdbc:mysql://211.99.234.151:50004/ztlb_equ_backup_clear?useUnicode=true&characterEncoding=utf8
+#jdbc.url=jdbc:mysql://192.168.2.95:3306/ztlb_equ_backup_clear?useUnicode=true&characterEncoding=utf8
+
+#the ZTLB test database
+#jdbc.url=jdbc:mysql://211.99.234.151:50004/ztlb_equ_test?useUnicode=true&characterEncoding=utf8
+jdbc.url=jdbc:mysql://192.168.2.95:3306/ztlb_equ_test?useUnicode=true&characterEncoding=utf8
+jdbc.username=root
+jdbc.password=equ2016cfbdymg
+
+jdbc.testsql=select 1
+jdbc.testsql.maxidle=8
+jdbc.testsql.runtime=600000
+jdbc.onborrow=false
+jdbc.whileidle=true
+
+
+ 
